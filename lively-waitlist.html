@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lively — Gamifica tu vida</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FFE135;
+    --yellow-dim: #C9B020;
+    --bg: #080808;
+    --bg-card: #111111;
+    --bg-card2: #181818;
+    --border: rgba(255,255,255,0.07);
+    --border-yellow: rgba(255,225,53,0.3);
+    --text: #FFFFFF;
+    --muted: #888888;
+    --muted2: #555555;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, .logo { font-family: 'Rajdhani', sans-serif; }
+
+  /* ---- NOISE OVERLAY ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background-size: 150px 150px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    height: 68px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--yellow);
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--text); }
+  .nav-cta {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    padding: 9px 22px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ---- HERO ---- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 5% 80px;
+    overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse at center, rgba(255,225,53,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-yellow);
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 28px;
+  }
+  .hero-badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--yellow);
+    border-radius: 50%;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    max-width: 860px;
+    margin-bottom: 24px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--yellow);
+  }
+  .hero p {
+    font-size: clamp(15px, 2vw, 18px);
+    color: var(--muted);
+    max-width: 480px;
+    margin-bottom: 44px;
+    line-height: 1.7;
+  }
+  .waitlist-form {
+    display: flex;
+    gap: 0;
+    max-width: 440px;
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-yellow);
+  }
+  .waitlist-form input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: none;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+  }
+  .waitlist-form input::placeholder { color: var(--muted2); }
+  .waitlist-form button {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    padding: 14px 24px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .waitlist-form button:hover { opacity: 0.85; }
+  .hero-sub {
+    font-size: 12px;
+    color: var(--muted2);
+    letter-spacing: 0.04em;
+  }
+
+  /* ---- PHONE MOCKUP ---- */
+  .phone-wrap {
+    margin-top: 72px;
+    position: relative;
+    display: inline-block;
+  }
+  .phone-glow-bottom {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 80px;
+    background: radial-gradient(ellipse, rgba(255,225,53,0.18) 0%, transparent 70%);
+  }
+
+  /* ---- SCROLLING TICKER ---- */
+  .ticker {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+    background: var(--bg-card);
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 60px;
+    animation: ticker 28s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+  .ticker-item {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ticker-item span { color: var(--yellow); font-size: 10px; }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ---- SECTIONS ---- */
+  section { position: relative; z-index: 1; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 5%; }
+  .section-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .section-desc {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.7;
+  }
+
+  /* ---- FEATURES ---- */
+  .features-section { padding: 100px 0; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+    border: 1px solid var(--border);
+  }
+  .feature-card {
+    background: var(--bg-card);
+    padding: 36px 32px;
+    border: none;
+    transition: background 0.2s;
+  }
+  .feature-card:hover { background: var(--bg-card2); }
+  .feature-icon {
+    width: 44px; height: 44px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .feature-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+  .feature-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ---- STATS SECTION ---- */
+  .stats-section {
+    padding: 100px 0;
+    background: linear-gradient(180deg, transparent, rgba(255,225,53,0.02) 50%, transparent);
+  }
+  .stats-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .stats-mockup {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+  .stats-month {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 20px;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stat-dot {
+    width: 6px; height: 6px;
+    background: var(--yellow);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .stat-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--yellow);
+  }
+  .stat-bar-wrap {
+    margin-top: 4px;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+  }
+  .stat-bar {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 2px;
+    transition: width 1.2s ease;
+  }
+  .level-display {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .level-left {}
+  .level-lbl {
+    font-size: 11px;
+    color: var(--muted2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+  .level-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--yellow);
+    line-height: 1.1;
+  }
+  .xp-bar-wrap {
+    flex: 1;
+    margin-left: 20px;
+  }
+  .xp-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted2);
+    margin-bottom: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .xp-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    width: 68%;
+    background: linear-gradient(90deg, var(--yellow-dim), var(--yellow));
+    border-radius: 3px;
+    animation: xpfill 2s ease forwards;
+  }
+  @keyframes xpfill {
+    from { width: 0; }
+    to { width: 68%; }
+  }
+
+  /* ---- MISSIONS ---- */
+  .missions-section { padding: 100px 0; }
+  .missions-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .mission-list { margin-top: 48px; }
+  .mission-item {
+    display: flex;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mission-item:first-child { border-top: 1px solid var(--border); }
+  .mission-number {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--yellow);
+    min-width: 24px;
+    padding-top: 2px;
+  }
+  .mission-content h4 {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .mission-content p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .missions-right { padding-top: 0; }
+  .quest-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 24px 22px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s;
+  }
+  .quest-card:hover { border-color: var(--border-yellow); }
+  .quest-icon {
+    width: 40px; height: 40px;
+    background: rgba(255,225,53,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .quest-info { flex: 1; }
+  .quest-title {
+    font-size: 14px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .quest-progress-bg {
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .quest-progress-fill {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 2px;
+  }
+  .quest-pct {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--yellow);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* ---- ACHIEVEMENTS ---- */
+  .achievements-section {
+    padding: 80px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .achievements-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+  .badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100px;
+  }
+  .badge-icon {
+    width: 64px; height: 64px;
+    border: 1px solid var(--border-yellow);
+    background: rgba(255,225,53,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .badge-icon.locked {
+    border-color: var(--border);
+    background: rgba(255,255,255,0.02);
+    filter: grayscale(1);
+    opacity: 0.4;
+  }
+  .badge-name {
+    font-size: 11px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--muted);
+  }
+  .badge-name.unlocked { color: var(--yellow); }
+
+  /* ---- FINAL CTA ---- */
+  .cta-section {
+    padding: 120px 0;
+    text-align: center;
+  }
+  .cta-section h2 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+  .cta-section h2 em {
+    font-style: normal;
+    color: var(--yellow);
+  }
+  .cta-section p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 400px;
+    margin: 0 auto 40px;
+  }
+  .counter {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--muted2);
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .counter strong { color: var(--yellow); font-size: 14px; }
+
+  /* ---- FOOTER ---- */
+  footer {
+    padding: 40px 5%;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .footer-right {
+    font-size: 12px;
+    color: var(--muted2);
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .stats-layout, .missions-layout { grid-template-columns: 1fr; gap: 40px; }
+    .waitlist-form { flex-direction: column; border: none; gap: 2px; }
+    .waitlist-form input { border: 1px solid var(--border-yellow); }
+    .waitlist-form button { width: 100%; }
+    .achievements-row { gap: 8px; }
+    .badge-item { width: 80px; }
+  }
+
+  /* ---- SUCCESS STATE ---- */
+  .form-success {
+    display: none;
+    padding: 14px 24px;
+    border: 1px solid var(--border-yellow);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    text-align: center;
+    max-width: 440px;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Live<span>ly</span></div>
+  <button class="nav-cta" onclick="document.getElementById('hero-email').focus()">Unirse a la waitlist</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">MVP en desarrollo</div>
+  <h1>Tu vida es<br>el <em>videojuego</em></h1>
+  <p>Trackea hábitos, completa misiones anuales y sube de nivel en las áreas que importan. Real life, RPG mode.</p>
+
+  <form class="waitlist-form" onsubmit="handleSubmit(event)">
+    <input type="email" id="hero-email" placeholder="tu@email.com" required>
+    <button type="submit">Unirme →</button>
+  </form>
+  <div class="form-success" id="success-msg">
+    ⚡ Eres player #<span id="player-num">247</span>. Te avisamos al lanzar.
+  </div>
+  <p class="hero-sub">Sin spam. Solo el lanzamiento.</p>
+
+  <!-- PHONE MOCKUP -->
+  <div class="phone-wrap">
+    <div class="phone-glow-bottom"></div>
+    <svg width="280" height="520" viewBox="0 0 280 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Phone frame -->
+      <rect x="1" y="1" width="278" height="518" rx="36" fill="#111111" stroke="#2A2A2A" stroke-width="2"/>
+      <!-- Status bar -->
+      <rect x="100" y="14" width="80" height="8" rx="4" fill="#1E1E1E"/>
+      <!-- Top section: XP bar -->
+      <rect x="20" y="44" width="240" height="1" fill="#1E1E1E"/>
+      <!-- Player header -->
+      <text x="20" y="74" font-family="Rajdhani, sans-serif" font-size="11" font-weight="600" fill="#888" letter-spacing="2">LIVELY · PLAYER</text>
+      <text x="20" y="96" font-family="Rajdhani, sans-serif" font-size="28" font-weight="700" fill="#FFFFFF">NIVEL 12</text>
+      <!-- XP bar bg -->
+      <rect x="20" y="106" width="200" height="5" rx="2.5" fill="#1E1E1E"/>
+      <!-- XP bar fill -->
+      <rect x="20" y="106" width="136" height="5" rx="2.5" fill="#FFE135"/>
+      <text x="228" y="112" font-family="Rajdhani, sans-serif" font-size="10" fill="#888">680/1000 XP</text>
+      <rect x="20" y="120" width="240" height="1" fill="#1E1E1E"/>
+
+      <!-- Stats area -->
+      <text x="20" y="146" font-family="Rajdhani, sans-serif" font-size="10" font-weight="600" fill="#888" letter-spacing="2">RECAP · ABRIL</text>
+
+      <!-- Stat 1 -->
+      <text x="20" y="170" font-family="Rajdhani, sans-serif" font-size="13" fill="#888">Entrenos</text>
+      <text x="200" y="170" font-family="Rajdhani, sans-serif" font-size="16" font-weight="700" fill="#FFE135">18</text>
+      <rect x="20" y="175" width="200" height="3" rx="1.5" fill="#1A1A1A"/>
+      <rect x="20" y="175" width="144" height="3" rx="1.5" fill="#FFE135"/>
+
+      <!-- Stat 2 -->
+      <text x="20" y="200" font-family="Rajdhani, sans-serif" font-size="13" fill="#888">Km corridos</text>
+      <text x="200" y="200" font-family="Rajdhani, sans-serif" font-size="16" font-weight="700" fill="#FFE135">87</text>
+      <rect x="20" y="205" width="200" height="3" rx="1.5" fill="#1A1A1A"/>
+      <rect x="20" y="205" width="174" height="3" rx="1.5" fill="#FFE135"/>
+
+      <!-- Stat 3 -->
+      <text x="20" y="230" font-family="Rajdhani, sans-serif" font-size="13" fill="#888">Días de dieta</text>
+      <text x="200" y="230" font-family="Rajdhani, sans-serif" font-size="16" font-weight="700" fill="#FFE135">22</text>
+      <rect x="20" y="235" width="200" height="3" rx="1.5" fill="#1A1A1A"/>
+      <rect x="20" y="235" width="110" height="3" rx="1.5" fill="#FFE135"/>
+
+      <rect x="20" y="250" width="240" height="1" fill="#1E1E1E"/>
+
+      <!-- Main quests -->
+      <text x="20" y="274" font-family="Rajdhani, sans-serif" font-size="10" font-weight="600" fill="#888" letter-spacing="2">MISIONES ACTIVAS</text>
+
+      <!-- Quest 1 -->
+      <rect x="20" y="284" width="240" height="48" rx="4" fill="#181818"/>
+      <rect x="20" y="284" width="3" height="48" rx="1.5" fill="#FFE135"/>
+      <text x="32" y="304" font-family="Rajdhani, sans-serif" font-size="12" font-weight="700" fill="#FFF" letter-spacing="1">CORRER MARATÓN</text>
+      <text x="32" y="322" font-family="Rajdhani, sans-serif" font-size="10" fill="#888">87 / 200 km totales</text>
+      <text x="226" y="314" font-family="Rajdhani, sans-serif" font-size="14" font-weight="700" fill="#FFE135">44%</text>
+
+      <!-- Quest 2 -->
+      <rect x="20" y="340" width="240" height="48" rx="4" fill="#181818"/>
+      <rect x="20" y="340" width="3" height="48" rx="1.5" fill="#888"/>
+      <text x="32" y="360" font-family="Rajdhani, sans-serif" font-size="12" font-weight="700" fill="#FFF" letter-spacing="1">APROBAR CURSO</text>
+      <text x="32" y="378" font-family="Rajdhani, sans-serif" font-size="10" fill="#888">4 / 6 módulos</text>
+      <text x="226" y="370" font-family="Rajdhani, sans-serif" font-size="14" font-weight="700" fill="#888">67%</text>
+
+      <!-- Achievement -->
+      <rect x="20" y="400" width="240" height="1" fill="#1E1E1E"/>
+      <text x="20" y="424" font-family="Rajdhani, sans-serif" font-size="10" font-weight="600" fill="#888" letter-spacing="2">LOGROS RECIENTES</text>
+      <!-- badges -->
+      <rect x="20" y="434" width="44" height="44" rx="4" fill="#1A1A1A" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="42" y="462" font-family="serif" font-size="18" fill="#FFE135" text-anchor="middle">🏃</text>
+      <rect x="74" y="434" width="44" height="44" rx="4" fill="#1A1A1A" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="96" y="462" font-family="serif" font-size="18" fill="#FFE135" text-anchor="middle">💪</text>
+      <rect x="128" y="434" width="44" height="44" rx="4" fill="#1A1A1A" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="150" y="462" font-family="serif" font-size="18" fill="#FFE135" text-anchor="middle">🎯</text>
+      <rect x="182" y="434" width="44" height="44" rx="4" fill="#131313" stroke="#1E1E1E" stroke-width="1" opacity="0.4"/>
+      <text x="204" y="462" font-family="serif" font-size="18" fill="#555" text-anchor="middle">🔒</text>
+      <rect x="236" y="434" width="24" height="44" rx="4" fill="#131313" stroke="#1E1E1E" stroke-width="1" opacity="0.4"/>
+
+      <!-- Home indicator -->
+      <rect x="110" y="500" width="60" height="4" rx="2" fill="#2A2A2A"/>
+    </svg>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item">Hábitos diarios <span>✦</span></div>
+    <div class="ticker-item">Misiones anuales <span>✦</span></div>
+    <div class="ticker-item">Recaps mensuales <span>✦</span></div>
+    <div class="ticker-item">Sube de nivel <span>✦</span></div>
+    <div class="ticker-item">Logros desbloqueables <span>✦</span></div>
+    <div class="ticker-item">Stats personalizados <span>✦</span></div>
+    <div class="ticker-item">Áreas de vida <span>✦</span></div>
+    <div class="ticker-item">Recompensas <span>✦</span></div>
+    <!-- duplicated for infinite scroll -->
+    <div class="ticker-item">Hábitos diarios <span>✦</span></div>
+    <div class="ticker-item">Misiones anuales <span>✦</span></div>
+    <div class="ticker-item">Recaps mensuales <span>✦</span></div>
+    <div class="ticker-item">Sube de nivel <span>✦</span></div>
+    <div class="ticker-item">Logros desbloqueables <span>✦</span></div>
+    <div class="ticker-item">Stats personalizados <span>✦</span></div>
+    <div class="ticker-item">Áreas de vida <span>✦</span></div>
+    <div class="ticker-item">Recompensas <span>✦</span></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="container">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">Todo lo que<br>necesitas para<br>ganar en la vida</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="24" height="24" rx="3" stroke="#FFE135" stroke-width="1.5"/>
+            <path d="M8 14L11.5 17.5L20 9" stroke="#FFE135" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Hábitos diarios</h3>
+        <p>Marca tus hábitos cada día. Cada check suma XP, mantiene rachas y te acerca al siguiente nivel. Simple, adictivo, efectivo.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 3L16.5 9.5H23.5L18 13.5L20 20L14 16L8 20L10 13.5L4.5 9.5H11.5L14 3Z" stroke="#FFE135" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Misiones principales</h3>
+        <p>Define tus grandes objetivos del año como misiones. ¿Correr una maratón? ¿Aprobar el curso? Trázalos y ve su progreso en tiempo real.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M4 22V10M10 22V6M16 22V14M22 22V4" stroke="#FFE135" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Recaps mensuales</h3>
+        <p>Cada mes un resumen brutal con todas tus stats: entrenos, kilómetros, días de dieta y cualquier métrica que quieras trackear.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="11" stroke="#FFE135" stroke-width="1.5"/>
+            <path d="M14 8V14L18 16" stroke="#FFE135" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Sube de nivel</h3>
+        <p>Cada hábito completado, cada misión cerrada, cada racha mantenida te da XP. Sube de nivel, desbloquea logros y recompensas exclusivas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-layout">
+      <div>
+        <p class="section-label">Monthly Recap</p>
+        <h2 class="section-title">Tus números,<br>sin mentirte</h2>
+        <p class="section-desc">Define qué quieres medir y Lively lo trackea por ti. Fin de mes: tu recap personalizado con todas las stats que importan.</p>
+      </div>
+      <div class="stats-mockup">
+        <p class="stats-month">// Recap · Abril 2025</p>
+        <div class="stat-row">
+          <div class="stat-label"><span class="stat-dot"></span> Entrenos</div>
+          <div class="stat-value">18</div>
+        </div>
+        <div class="stat-bar-wrap"><div class="stat-bar" style="width:72%"></div></div>
+        <br>
+        <div class="stat-row">
+          <div class="stat-label"><span class="stat-dot"></span> Kilómetros corridos</div>
+          <div class="stat-value">87 km</div>
+        </div>
+        <div class="stat-bar-wrap"><div class="stat-bar" style="width:87%"></div></div>
+        <br>
+        <div class="stat-row">
+          <div class="stat-label"><span class="stat-dot"></span> Días de dieta</div>
+          <div class="stat-value">22</div>
+        </div>
+        <div class="stat-bar-wrap"><div class="stat-bar" style="width:73%"></div></div>
+        <br>
+        <div class="stat-row">
+          <div class="stat-label"><span class="stat-dot"></span> Libros leídos</div>
+          <div class="stat-value">2</div>
+        </div>
+        <div class="stat-bar-wrap"><div class="stat-bar" style="width:40%"></div></div>
+        <br>
+        <div class="stat-row">
+          <div class="stat-label"><span class="stat-dot"></span> Horas de sueño prom.</div>
+          <div class="stat-value">7.2h</div>
+        </div>
+        <div class="stat-bar-wrap"><div class="stat-bar" style="width:60%"></div></div>
+
+        <div class="level-display">
+          <div class="level-left">
+            <div class="level-lbl">Nivel</div>
+            <div class="level-num">12</div>
+          </div>
+          <div class="xp-bar-wrap">
+            <div class="xp-label">
+              <span>XP del mes</span>
+              <span>680 / 1000</span>
+            </div>
+            <div class="xp-bar-bg">
+              <div class="xp-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSIONS -->
+<section class="missions-section">
+  <div class="container">
+    <div class="missions-layout">
+      <div>
+        <p class="section-label">Main Quests</p>
+        <h2 class="section-title">Tus grandes<br>objetivos,<br>como misiones</h2>
+        <div class="mission-list">
+          <div class="mission-item">
+            <span class="mission-number">01</span>
+            <div class="mission-content">
+              <h4>Define tu misión del año</h4>
+              <p>Crea tus objetivos principales: correr una maratón, aprobar el curso, lanzar el proyecto. Ponles nombre de misión.</p>
+            </div>
+          </div>
+          <div class="mission-item">
+            <span class="mission-number">02</span>
+            <div class="mission-content">
+              <h4>Conecta hábitos a misiones</h4>
+              <p>Cada hábito diario avanza en tu misión. Cada kilómetro cuenta. Cada sesión de estudio suma progreso real.</p>
+            </div>
+          </div>
+          <div class="mission-item">
+            <span class="mission-number">03</span>
+            <div class="mission-content">
+              <h4>Celebra cada victoria</h4>
+              <p>Al completar una misión, desbloqueas logros únicos, ganas XP masivo y subes de nivel. El juego te recompensa.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="missions-right">
+        <div style="padding-top:60px">
+          <div class="quest-card">
+            <div class="quest-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2L12 7H17L13 10.5L14.5 16L10 13L5.5 16L7 10.5L3 7H8L10 2Z" stroke="#FFE135" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div class="quest-info">
+              <div class="quest-title">Correr Maratón 2025</div>
+              <div class="quest-progress-bg">
+                <div class="quest-progress-fill" style="width:44%"></div>
+              </div>
+            </div>
+            <div class="quest-pct">44%</div>
+          </div>
+
+          <div class="quest-card">
+            <div class="quest-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="3" y="3" width="14" height="14" rx="2" stroke="#FFE135" stroke-width="1.2"/>
+                <path d="M7 10H13M10 7V13" stroke="#FFE135" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="quest-info">
+              <div class="quest-title">Aprobar el Curso</div>
+              <div class="quest-progress-bg">
+                <div class="quest-progress-fill" style="width:67%"></div>
+              </div>
+            </div>
+            <div class="quest-pct">67%</div>
+          </div>
+
+          <div class="quest-card">
+            <div class="quest-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2L13 8H18L14 12L16 18L10 14L4 18L6 12L2 8H7L10 2Z" stroke="#888" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div class="quest-info">
+              <div class="quest-title">Nuevo side project</div>
+              <div class="quest-progress-bg">
+                <div class="quest-progress-fill" style="width:15%; background: #555"></div>
+              </div>
+            </div>
+            <div class="quest-pct" style="color: #888">15%</div>
+          </div>
+
+          <div class="quest-card" style="opacity:0.4; border-style: dashed">
+            <div class="quest-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="7" y="3" width="6" height="8" rx="3" stroke="#888" stroke-width="1.2"/>
+                <path d="M4 17C4 14.2 6.7 12 10 12C13.3 12 16 14.2 16 17" stroke="#888" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="quest-info">
+              <div class="quest-title" style="color:#555">+ Nueva misión</div>
+              <div class="quest-progress-bg">
+                <div class="quest-progress-fill" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="quest-pct" style="color:#333">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section class="achievements-section">
+  <div class="container">
+    <p class="section-label">Logros</p>
+    <h2 class="section-title">Desbloquea tu<br>colección</h2>
+    <div class="achievements-row">
+      <div class="badge-item">
+        <div class="badge-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 4L16.5 10H23L17.5 14L20 20.5L14 17L8 20.5L10.5 14L5 10H11.5L14 4Z" fill="rgba(255,225,53,0.15)" stroke="#FFE135" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="badge-name unlocked">Primer nivel</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M8 14A6 6 0 1020 14A6 6 0 008 14Z" fill="rgba(255,225,53,0.15)" stroke="#FFE135" stroke-width="1.2"/>
+            <path d="M14 10V14L16.5 15.5" stroke="#FFE135" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="badge-name unlocked">Racha 7d</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M5 22V10M9.5 22V6M14 22V14M18.5 22V4M23 22V8" stroke="#FFE135" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="badge-name unlocked">Racha 30d</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="11" r="5" fill="rgba(255,225,53,0.15)" stroke="#FFE135" stroke-width="1.2"/>
+            <path d="M7 23C7 19.7 10.1 17 14 17C17.9 17 21 19.7 21 23" stroke="#FFE135" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="badge-name unlocked">Nivel 10</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon locked">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 4L16.5 10H23L17.5 14L20 20.5L14 17L8 20.5L10.5 14L5 10H11.5L14 4Z" stroke="#888" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="badge-name">Misión 1</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon locked">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M6 10H22V20C22 21.1 21.1 22 20 22H8C6.9 22 6 21.1 6 20V10Z" stroke="#888" stroke-width="1.2"/>
+            <path d="M10 10V7C10 5.3 11.3 4 13 4H15C16.7 4 18 5.3 18 7V10" stroke="#888" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="badge-name">Nivel 25</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon locked">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M4 24L14 4L24 24H4Z" stroke="#888" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="badge-name">Élite</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-icon locked">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="10" stroke="#888" stroke-width="1.2"/>
+            <path d="M10 14L13 17L18 11" stroke="#888" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="badge-name">100 días</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Empieza a<br>jugar tu<br><em>mejor vida</em></h2>
+    <p>Sé de los primeros en probar Lively cuando lancemos el MVP. Gratis para early adopters.</p>
+    <form class="waitlist-form" style="margin: 0 auto" onsubmit="handleSubmit(event)">
+      <input type="email" placeholder="tu@email.com" required>
+      <button type="submit">Quiero entrar →</button>
+    </form>
+    <div class="form-success" id="success-msg2" style="margin: 0 auto; margin-top: 0;">
+      ⚡ Anotado. Te avisamos al lanzar.
+    </div>
+    <div class="counter" style="margin-top: 24px">
+      <strong id="waitlist-count">246</strong> jugadores en la waitlist
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Lively</div>
+  <div class="footer-right">© 2025 Lively · MVP en desarrollo</div>
+</footer>
+
+<script>
+  let count = 246;
+  function handleSubmit(e) {
+    e.preventDefault();
+    count++;
+    document.getElementById('waitlist-count').textContent = count;
+    document.getElementById('player-num').textContent = count;
+    const form = e.target;
+    form.style.display = 'none';
+    const success1 = document.getElementById('success-msg');
+    const success2 = document.getElementById('success-msg2');
+    if (success1 && form.closest('.hero')) {
+      success1.style.display = 'block';
+    }
+    if (success2 && !form.closest('.hero')) {
+      success2.style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>
