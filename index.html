@@ -1068,22 +1068,39 @@
 
 <script>
   let count = 246;
-  function handleSubmit(e) {
-    e.preventDefault();
-    count++;
-    document.getElementById('waitlist-count').textContent = count;
-    document.getElementById('player-num').textContent = count;
-    const form = e.target;
-    form.style.display = 'none';
-    const success1 = document.getElementById('success-msg');
-    const success2 = document.getElementById('success-msg2');
-    if (success1 && form.closest('.hero')) {
-      success1.style.display = 'block';
-    }
-    if (success2 && !form.closest('.hero')) {
-      success2.style.display = 'block';
-    }
+ async function handleSubmit(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const emailInput = form.querySelector('input[type="email"]');
+  const email = emailInput.value;
+
+  await fetch("https://hook.eu1.make.com/gw1wi4rgjqrkq897hctqvig9up4146vk
+", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email })
+  });
+
+  count++;
+  document.getElementById('waitlist-count').textContent = count;
+  document.getElementById('player-num').textContent = count;
+
+  form.style.display = 'none';
+
+  const success1 = document.getElementById('success-msg');
+  const success2 = document.getElementById('success-msg2');
+
+  if (success1 && form.closest('.hero')) {
+    success1.style.display = 'block';
   }
+  if (success2 && !form.closest('.hero')) {
+    success2.style.display = 'block';
+  }
+}
+
 </script>
 </body>
 </html>
